@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block title %}Product: {{ product.name }}{% endblock %}
+{% block page_title %}{{ product.name }} ({{ product.sku }}){% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+
+  <!-- Overview Header -->
+  <div class="card mb-4">
+    <div class="card-body p-4">
+      <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+        <div>
+          <span class="badge bg-light text-dark border mb-2">{{ product.category.name }}</span>
+          {% if product.is_low_stock %}
+            <span class="badge bg-danger mb-2 ms-1">LOW STOCK CRITICAL</span>
+          {% else %}
+            <span class="badge badge-subtle-success mb-2 ms-1">STOCK HEALTHY</span>
+          {% endif %}
+          <h4 class="fw-bold mb-1">{{ product.name }}</h4>
+          <p class="text-muted mb-0">
+            SKU: <code class="fw-bold text-primary">{{ product.sku }}</code> &bull;
+            Warehouse: <a href="{{ url_for('warehouse.detail', id=product.warehouse_id) }}" class="text-decoration-none fw-semibold">{{ product.warehouse.name }} ({{ product.warehouse.code }})</a>
+          </p>
+        </div>
+
+        <div class="d-flex gap-2 mt-2 mt-md-0">
+          <a href="{{ url_for('stock.stock_in', product_id=product.id) }}" class="btn btn-success">
+            <i class="bi bi-arrow-down-right me-1"></i> Stock In
+          </a>
+          <a href="{{ url_for('stock.stock_out', product_id=product.id) }}" class="btn btn-danger">
+            <i class="bi bi-arrow-up-right me-1"></i> Stock Out
+          </a>
+          <a href="{{ url_for('inventory.edit', id=product.id) }}" class="btn btn-outline-primary">
+            <i class="bi bi-pencil me-1"></i> Edit
+          </a>
+        </div>
+      </div>
+
+      <!-- Inventory Metrics Grid -->
+      <div class="row g-3 pt-3 border-top">
+        <div class="col-md-3">
+          <span class="small text-muted text-uppercase fw-semibold">Current On-Hand</span>
+          <h4 class="fw-bold mt-1 mb-0 {% if product.is_low_stock %}text-danger{% else %}text-success{% endif %}">
+            {{ product.current_stock }} <span class="fs-6 text-muted font-normal">{{ product.unit }}</span>
+          </h4>
+        </div>
+        <div class="col-md-3">
+          <span class="small text-muted text-uppercase fw-semibold">Safety Reorder Point</span>
+          <h4 class="fw-bold mt-1 mb-0 text-secondary">
+            {{ product.min_threshold }} <span class="fs-6 text-muted font-normal">{{ product.unit }}</span>
+          </h4>
+        </div>
+        <div class="col-md-3">
+          <span class="small text-muted text-uppercase fw-semibold">Supplier Lead Time</span>
+          <h4 class="fw-bold mt-1 mb-0 text-dark">
+            {{ product.lead_time_days }} <span class="fs-6 text-muted font-normal">Days</span>
+          </h4>
+        </div>
+        <div class="col-md-3">
+          <span class="small text-muted text-uppercase fw-semibold">Total Asset Value</span>
+          <h4 class="fw-bold mt-1 mb-0 text-primary">
+            ${{ "{:,.2f}".format(product.total_valuation) }}
+          </h4>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Movements for this SKU -->
+  <div class="card">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+      <h6 class="mb-0 fw-bold"><i class="bi bi-clock-history text-primary me-2"></i>Recent Stock Movements for this SKU</h6>
+      <a href="{{ url_for('stock.history', product_id=product.id) }}" class="btn btn-sm btn-outline-secondary">Complete SKU History</a>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>Type</th>
+              <th>Quantity</th>
+              <th>Balance After</th>
+              <th>Reference #</th>
+              <th>Recorded By</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if transactions %}
+              {% for txn in transactions %}
+                <tr>
+                  <td class="small text-muted">{{ txn.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                  <td>
+                    {% if txn.transaction_type == 'STOCK_IN' %}
+                      <span class="badge badge-subtle-success">STOCK IN</span>
+                    {% elif txn.transaction_type == 'STOCK_OUT' %}
+                      <span class="badge badge-subtle-danger">STOCK OUT</span>
+                    {% else %}
+                      <span class="badge badge-subtle-warning">{{ txn.transaction_type }}</span>
+                    {% endif %}
+                  </td>
+                  <td class="fw-bold {% if txn.transaction_type == 'STOCK_IN' %}text-success{% else %}text-danger{% endif %}">
+                    {% if txn.transaction_type == 'STOCK_IN' %}+{% else %}-{% endif %}{{ txn.quantity }} {{ product.unit }}
+                  </td>
+                  <td class="fw-semibold">{{ txn.balance_after }} {{ product.unit }}</td>
+                  <td class="small text-secondary">{{ txn.reference_no or '—' }}</td>
+                  <td class="small">{{ txn.creator.username }}</td>
+                  <td class="small text-muted">{{ txn.notes or '—' }}</td>
+                </tr>
+              {% endfor %}
+            {% else %}
+              <tr>
+                <td colspan="7" class="text-center py-4 text-muted">
+                  No stock transactions logged yet for this item.
+                </td>
+              </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

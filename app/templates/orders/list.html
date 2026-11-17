@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}Customer Orders{% endblock %}
+{% block page_title %}Customer Order Management{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+
+  <!-- Search & Filter Card -->
+  <div class="card mb-4 p-3 bg-white">
+    <div class="row g-2 align-items-center justify-content-between">
+      <div class="col-md-8">
+        <form method="GET" action="{{ url_for('orders.index') }}" class="row g-2">
+          <div class="col-sm-6">
+            <div class="input-group">
+              <span class="input-group-text bg-light"><i class="bi bi-search text-muted"></i></span>
+              <input type="text" name="search" class="form-control" placeholder="Search order #, customer or email..." value="{{ search_query }}">
+            </div>
+          </div>
+          <div class="col-sm-4">
+            <select name="status" class="form-select">
+              <option value="">All Order Statuses</option>
+              <option value="PENDING" {% if status_filter == 'PENDING' %}selected{% endif %}>PENDING</option>
+              <option value="APPROVED" {% if status_filter == 'APPROVED' %}selected{% endif %}>APPROVED</option>
+              <option value="DISPATCHED" {% if status_filter == 'DISPATCHED' %}selected{% endif %}>DISPATCHED</option>
+              <option value="DELIVERED" {% if status_filter == 'DELIVERED' %}selected{% endif %}>DELIVERED</option>
+              <option value="CANCELLED" {% if status_filter == 'CANCELLED' %}selected{% endif %}>CANCELLED</option>
+            </select>
+          </div>
+          <div class="col-sm-2 d-flex gap-1">
+            <button type="submit" class="btn btn-primary" title="Filter"><i class="bi bi-funnel"></i></button>
+            {% if search_query or status_filter %}
+              <a href="{{ url_for('orders.index') }}" class="btn btn-outline-secondary" title="Clear Filters"><i class="bi bi-x-lg"></i></a>
+            {% endif %}
+          </div>
+        </form>
+      </div>
+
+      <div class="col-md-4 text-md-end">
+        <a href="{{ url_for('orders.create') }}" class="btn btn-primary">
+          <i class="bi bi-plus-lg me-1"></i> New Customer Order
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Orders Table -->
+  <div class="card shadow-sm">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Order Number</th>
+              <th>Customer</th>
+              <th>Order Date</th>
+              <th>Target Delivery</th>
+              <th>Line Items</th>
+              <th>Total Amount</th>
+              <th>Status</th>
+              <th class="text-end pe-4">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if orders %}
+              {% for o in orders %}
+                <tr>
+                  <td>
+                    <a href="{{ url_for('orders.detail', id=o.id) }}" class="fw-bold font-monospace text-primary text-decoration-none">
+                      {{ o.order_number }}
+                    </a>
+                  </td>
+                  <td>
+                    <div class="fw-semibold text-dark">{{ o.customer_name }}</div>
+                    <small class="text-muted">{{ o.customer_email }}</small>
+                  </td>
+                  <td class="small text-muted">{{ o.order_date.strftime('%Y-%m-%d %H:%M') }}</td>
+                  <td class="small fw-medium">{{ o.expected_delivery_date.strftime('%Y-%m-%d') }}</td>
+                  <td>
+                    <span class="badge bg-light text-dark border">{{ o.items|length }} SKU(s)</span>
+                  </td>
+                  <td class="fw-bold text-dark">${{ "{:,.2f}".format(o.total_amount) }}</td>
+                  <td>
+                    {% if o.status == 'PENDING' %}
+                      <span class="badge badge-subtle-warning"><i class="bi bi-hourglass-split me-1"></i> PENDING</span>
+                    {% elif o.status == 'APPROVED' %}
+                      <span class="badge badge-subtle-info"><i class="bi bi-check-circle me-1"></i> APPROVED</span>
+                    {% elif o.status == 'DISPATCHED' %}
+                      <span class="badge badge-subtle-primary"><i class="bi bi-send me-1"></i> DISPATCHED</span>
+                    {% elif o.status == 'DELIVERED' %}
+                      <span class="badge badge-subtle-success"><i class="bi bi-check-all me-1"></i> DELIVERED</span>
+                    {% else %}
+                      <span class="badge badge-subtle-danger"><i class="bi bi-x-circle me-1"></i> CANCELLED</span>
+                    {% endif %}
+                  </td>
+                  <td class="text-end pe-4">
+                    <a href="{{ url_for('orders.detail', id=o.id) }}" class="btn btn-sm btn-outline-secondary" title="View Order">
+                      <i class="bi bi-eye"></i> Details
+                    </a>
+                  </td>
+                </tr>
+              {% endfor %}
+            {% else %}
+              <tr>
+                <td colspan="8" class="text-center py-5 text-muted">
+                  <i class="bi bi-cart-x fs-1 d-block mb-2"></i>
+                  No customer orders found. Click "New Customer Order" to create one.
+                </td>
+              </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

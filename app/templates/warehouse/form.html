@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card shadow-sm">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+          <h6 class="mb-0 fw-bold">
+            <i class="bi bi-building text-primary me-2"></i>
+            {% if is_edit %}Edit Warehouse: {{ warehouse.code }}{% else %}Register New Storage Facility{% endif %}
+          </h6>
+          <a href="{{ url_for('warehouse.index') }}" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Back to List
+          </a>
+        </div>
+
+        <div class="card-body p-4">
+          <form method="POST" novalidate>
+            {{ form.hidden_tag() }}
+
+            <div class="row g-3 mb-3">
+              <div class="col-md-4">
+                <label for="code" class="form-label small fw-semibold text-secondary">Warehouse Code *</label>
+                {{ form.code(class="form-control text-uppercase" + (" is-invalid" if form.code.errors else ""), placeholder="e.g. WH-ORD-01") }}
+                {% if form.code.errors %}
+                  <div class="invalid-feedback d-block">
+                    {% for error in form.code.errors %}{{ error }}{% endfor %}
+                  </div>
+                {% endif %}
+                <small class="text-muted">Unique identifier for the site</small>
+              </div>
+
+              <div class="col-md-8">
+                <label for="name" class="form-label small fw-semibold text-secondary">Warehouse Facility Name *</label>
+                {{ form.name(class="form-control" + (" is-invalid" if form.name.errors else ""), placeholder="e.g. Central Distribution Hub") }}
+                {% if form.name.errors %}
+                  <div class="invalid-feedback d-block">
+                    {% for error in form.name.errors %}{{ error }}{% endfor %}
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label for="location" class="form-label small fw-semibold text-secondary">City / Region *</label>
+                {{ form.location(class="form-control" + (" is-invalid" if form.location.errors else ""), placeholder="e.g. Chicago, IL") }}
+                {% if form.location.errors %}
+                  <div class="invalid-feedback d-block">
+                    {% for error in form.location.errors %}{{ error }}{% endfor %}
+                  </div>
+                {% endif %}
+              </div>
+
+              <div class="col-md-6">
+                <label for="total_capacity_sqft" class="form-label small fw-semibold text-secondary">Total Capacity (sq. ft.) *</label>
+                {{ form.total_capacity_sqft(class="form-control" + (" is-invalid" if form.total_capacity_sqft.errors else ""), placeholder="e.g. 75000") }}
+                {% if form.total_capacity_sqft.errors %}
+                  <div class="invalid-feedback d-block">
+                    {% for error in form.total_capacity_sqft.errors %}{{ error }}{% endfor %}
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="address" class="form-label small fw-semibold text-secondary">Street Address</label>
+              {{ form.address(class="form-control" + (" is-invalid" if form.address.errors else ""), rows=2, placeholder="e.g. 450 Logistics Parkway, Industrial Zone 4") }}
+              {% if form.address.errors %}
+                <div class="invalid-feedback d-block">
+                  {% for error in form.address.errors %}{{ error }}{% endfor %}
+                </div>
+              {% endif %}
+            </div>
+
+            <div class="mb-4">
+              <label for="status" class="form-label small fw-semibold text-secondary">Operational Status</label>
+              {{ form.status(class="form-select") }}
+            </div>
+
+            <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+              <a href="{{ url_for('warehouse.index') }}" class="btn btn-outline-secondary">Cancel</a>
+              <button type="submit" class="btn btn-primary px-4">
+                <i class="bi bi-check2-circle me-1"></i> Save Warehouse
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

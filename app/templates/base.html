@@ -1,0 +1,270 @@
+]
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Smart Logistics{% endblock %} | AI Warehouse System</title>
+
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  {% block styles %}{% endblock %}
+</head>
+
+<body class="d-flex">
+
+  <!-- Sidebar -->
+  <aside id="sidebar" class="d-flex flex-column flex-shrink-0 text-white shadow-sm">
+
+    <div class="d-flex align-items-center p-3 border-bottom border-secondary border-opacity-25">
+      <i class="bi bi-boxes fs-3 text-primary me-2"></i>
+      <span class="fs-5 fw-bold tracking-tight">SmartLogistics</span>
+    </div>
+
+    <ul class="nav nav-pills flex-column mb-auto pt-2">
+
+      <!-- Dashboard -->
+      <li class="nav-item">
+        <a href="{{ url_for('dashboard.index') }}"
+           class="nav-link {% if request.endpoint == 'dashboard.index' %}active{% endif %}">
+          <i class="bi bi-grid-1x2-fill"></i> Dashboard
+        </a>
+      </li>
+
+      <!-- Facilities & Inventory -->
+      <li class="sidebar-heading">Facilities & Inventory</li>
+
+      <li class="nav-item">
+        <a href="{{ url_for('warehouse.index') }}"
+           class="nav-link {% if request.endpoint and request.endpoint.startswith('warehouse.') %}active{% endif %}">
+          <i class="bi bi-building"></i> Warehouses
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a href="{{ url_for('inventory.index') }}"
+           class="nav-link {% if request.endpoint == 'inventory.index' %}active{% endif %}">
+          <i class="bi bi-box-seam"></i> Product Catalog
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a href="{{ url_for('inventory.categories') }}"
+           class="nav-link {% if request.endpoint and 'categories' in request.endpoint %}active{% endif %}">
+          <i class="bi bi-tags"></i> Categories
+        </a>
+      </li>
+
+      <!-- Stock Operations -->
+      <li class="sidebar-heading">Stock Operations</li>
+
+      <li class="nav-item">
+        <a href="{{ url_for('stock.stock_in') }}"
+           class="nav-link {% if request.endpoint == 'stock.stock_in' %}active{% endif %}">
+          <i class="bi bi-arrow-down-right-circle text-success"></i> Stock In (Receipt)
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a href="{{ url_for('stock.stock_out') }}"
+           class="nav-link {% if request.endpoint == 'stock.stock_out' %}active{% endif %}">
+          <i class="bi bi-arrow-up-right-circle text-danger"></i> Stock Out (Dispatch)
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a href="{{ url_for('stock.history') }}"
+           class="nav-link {% if request.endpoint == 'stock.history' %}active{% endif %}">
+          <i class="bi bi-clock-history"></i> Stock Audit Trail
+        </a>
+      </li>
+
+      <!-- Logistics Operations -->
+      <li class="sidebar-heading">Logistics Operations</li>
+
+      <li class="nav-item">
+        <a href="{{ url_for('fleet.vehicles') }}"
+           class="nav-link {% if request.endpoint and 'fleet.vehicles' in request.endpoint %}active{% endif %}">
+          <i class="bi bi-truck"></i> Fleet Vehicles
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a href="{{ url_for('fleet.drivers') }}"
+           class="nav-link {% if request.endpoint and 'fleet.drivers' in request.endpoint %}active{% endif %}">
+          <i class="bi bi-person-badge"></i> Fleet Drivers
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a href="{{ url_for('orders.index') }}"
+           class="nav-link {% if request.endpoint and request.endpoint.startswith('orders.') %}active{% endif %}">
+          <i class="bi bi-cart-check"></i> Customer Orders
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a href="{{ url_for('dispatch.index') }}"
+           class="nav-link {% if request.endpoint and request.endpoint.startswith('dispatch.') %}active{% endif %}">
+          <i class="bi bi-send-check"></i> Dispatches & Tracking
+        </a>
+      </li>
+
+      <!-- AI Intelligence -->
+      <li class="sidebar-heading">AI Intelligence</li>
+
+      <li class="nav-item">
+        <a href="{{ url_for('ai.forecast') }}"
+           class="nav-link {% if request.endpoint == 'ai.forecast' %}active{% endif %}">
+          <i class="bi bi-cpu"></i> AI Demand Forecast
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a href="{{ url_for('ai.forecast_history') }}"
+           class="nav-link {% if request.endpoint == 'ai.forecast_history' %}active{% endif %}">
+          <i class="bi bi-clock-history"></i> Forecast History
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a href="{{ url_for('analytics.index') }}"
+           class="nav-link {% if request.endpoint and request.endpoint.startswith('analytics.') %}active{% endif %}">
+          <i class="bi bi-bar-chart-line"></i> Analytics & Reports
+        </a>
+      </li>
+
+      <!-- Administration -->
+      {% if current_user.is_authenticated and current_user.role == 'admin' %}
+        <li class="sidebar-heading">Administration</li>
+
+        <li class="nav-item">
+          <a href="{{ url_for('auth.list_users') }}"
+             class="nav-link {% if request.endpoint and 'user' in request.endpoint %}active{% endif %}">
+            <i class="bi bi-people-fill text-danger"></i> User Management
+          </a>
+        </li>
+      {% endif %}
+
+    </ul>
+
+    <!-- Bottom User Section -->
+    <div class="p-3 border-top border-secondary border-opacity-25 mt-auto bg-dark bg-opacity-25">
+
+      <div class="d-flex align-items-center">
+
+        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-2"
+             style="width: 36px; height: 36px;">
+          <i class="bi bi-person-fill"></i>
+        </div>
+
+        <div class="flex-grow-1 overflow-hidden">
+          <div class="fw-semibold text-truncate small">
+            {{ current_user.username }}
+          </div>
+
+          <span class="badge bg-secondary text-uppercase" style="font-size: 0.65rem;">
+            {{ current_user.role }}
+          </span>
+        </div>
+
+        <a href="{{ url_for('auth.logout') }}" class="text-danger ms-2" title="Sign Out">
+          <i class="bi bi-box-arrow-right fs-5"></i>
+        </a>
+
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- Main Content Wrapper -->
+  <div class="flex-grow-1 d-flex flex-column min-vh-100 overflow-x-hidden">
+
+    <!-- Top Navbar -->
+    <header class="top-navbar d-flex align-items-center justify-content-between">
+
+      <div class="d-flex align-items-center">
+        <h5 class="mb-0 fw-bold text-dark">
+          {% block page_title %}Dashboard{% endblock %}
+        </h5>
+      </div>
+
+      <div class="d-flex align-items-center gap-3">
+
+        <span class="badge badge-subtle-success px-3 py-2 rounded-pill">
+          <i class="bi bi-circle-fill text-success fs-8 me-1"></i>
+          System Online
+        </span>
+
+        <div class="vr"></div>
+
+        <a href="{{ url_for('stock.stock_in') }}" class="btn btn-sm btn-outline-success">
+          <i class="bi bi-plus-circle me-1"></i> Quick Stock In
+        </a>
+
+        <a href="{{ url_for('stock.stock_out') }}" class="btn btn-sm btn-outline-danger">
+          <i class="bi bi-dash-circle me-1"></i> Quick Stock Out
+        </a>
+
+      </div>
+    </header>
+
+    <!-- Main Content Body -->
+    <main class="flex-grow-1 p-4">
+
+      <!-- Flash Alert Banners -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+
+            <div class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show shadow-sm"
+                 role="alert">
+
+              <i class="bi {% if category == 'success' %}bi-check-circle-fill{% elif category == 'danger' %}bi-exclamation-triangle-fill{% else %}bi-info-circle-fill{% endif %} me-2"></i>
+
+              {{ message }}
+
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+
+            </div>
+
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      {% block content %}{% endblock %}
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-top py-2 px-4 text-muted small d-flex justify-content-between align-items-center">
+
+      <span>AI Smart Warehouse & Logistics Management System &copy; 2026</span>
+
+      <span>Technical Evaluation &bull; Flask &bull; MySQL &bull; Scikit-Learn</span>
+
+    </footer>
+
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Main Application JS -->
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+  <!-- Page Specific JavaScript -->
+  {% block extra_js %}{% endblock %}
+  {% block scripts %}{% endblock %}
+
+</body>
+</html>

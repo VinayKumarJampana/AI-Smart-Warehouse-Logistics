@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}Warehouses{% endblock %}
+{% block page_title %}Warehouse Storage Facilities{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+
+  <!-- Header with Actions and Filters -->
+  <div class="card mb-4 p-3 bg-white">
+    <div class="row g-3 align-items-center justify-content-between">
+      <div class="col-md-7">
+        <form method="GET" action="{{ url_for('warehouse.index') }}" class="row g-2">
+          <div class="col-sm-7">
+            <div class="input-group">
+              <span class="input-group-text bg-light"><i class="bi bi-search text-muted"></i></span>
+              <input type="text" name="search" class="form-control" placeholder="Search by name, code or city..." value="{{ search_query }}">
+            </div>
+          </div>
+          <div class="col-sm-3">
+            <select name="status" class="form-select">
+              <option value="">All Statuses</option>
+              <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active</option>
+              <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inactive</option>
+              <option value="maintenance" {% if status_filter == 'maintenance' %}selected{% endif %}>Maintenance</option>
+            </select>
+          </div>
+          <div class="col-sm-2 d-flex gap-1">
+            <button type="submit" class="btn btn-primary w-100">Filter</button>
+            {% if search_query or status_filter %}
+              <a href="{{ url_for('warehouse.index') }}" class="btn btn-outline-secondary" title="Clear Filters"><i class="bi bi-x-lg"></i></a>
+            {% endif %}
+          </div>
+        </form>
+      </div>
+
+      <div class="col-md-4 text-md-end">
+        <a href="{{ url_for('warehouse.create') }}" class="btn btn-primary">
+          <i class="bi bi-plus-lg me-1"></i> Add Warehouse Facility
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Warehouses Table -->
+  <div class="card">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Code</th>
+              <th>Facility Name</th>
+              <th>Location</th>
+              <th>Capacity</th>
+              <th>Stored SKUs</th>
+              <th>Status</th>
+              <th class="text-end pe-4">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if warehouses %}
+              {% for wh in warehouses %}
+                <tr>
+                  <td><code class="fw-bold">{{ wh.code }}</code></td>
+                  <td>
+                    <a href="{{ url_for('warehouse.detail', id=wh.id) }}" class="fw-semibold text-dark text-decoration-none">
+                      {{ wh.name }}
+                    </a>
+                    {% if wh.address %}
+                      <div class="small text-muted text-truncate" style="max-width: 200px;">{{ wh.address }}</div>
+                    {% endif %}
+                  </td>
+                  <td><i class="bi bi-geo-alt text-danger me-1"></i> {{ wh.location }}</td>
+                  <td>{{ "{:,}".format(wh.total_capacity_sqft) }} sq ft</td>
+                  <td>
+                    <span class="badge bg-light text-dark border">
+                      {{ wh.products.count() }} SKUs
+                    </span>
+                  </td>
+                  <td>
+                    {% if wh.status == 'active' %}
+                      <span class="badge badge-subtle-success">Active</span>
+                    {% elif wh.status == 'maintenance' %}
+                      <span class="badge badge-subtle-warning">Maintenance</span>
+                    {% else %}
+                      <span class="badge badge-subtle-danger">Inactive</span>
+                    {% endif %}
+                  </td>
+                  <td class="text-end pe-4">
+                    <div class="btn-group btn-group-sm">
+                      <a href="{{ url_for('warehouse.detail', id=wh.id) }}" class="btn btn-outline-secondary" title="View Details">
+                        <i class="bi bi-eye"></i>
+                      </a>
+                      <a href="{{ url_for('warehouse.edit', id=wh.id) }}" class="btn btn-outline-primary" title="Edit Facility">
+                        <i class="bi bi-pencil"></i>
+                      </a>
+                      {% if current_user.role == 'admin' %}
+                        <form method="POST" action="{{ url_for('warehouse.delete', id=wh.id) }}" class="d-inline" onsubmit="return confirm('Are you sure you want to delete warehouse {{ wh.code }}? This action cannot be undone.');">
+                          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                          <button type="submit" class="btn btn-outline-danger" title="Delete Facility">
+                            <i class="bi bi-trash"></i>
+                          </button>
+                        </form>
+                      {% endif %}
+                    </div>
+                  </td>
+                </tr>
+              {% endfor %}
+            {% else %}
+              <tr>
+                <td colspan="7" class="text-center py-5 text-muted">
+                  <i class="bi bi-building-slash fs-1 d-block mb-2"></i>
+                  No warehouses found matching your criteria.
+                </td>
+              </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}Create Customer Order{% endblock %}
+{% block page_title %}New Customer Fulfillment Order{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card shadow-sm">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+          <h6 class="mb-0 fw-bold">
+            <i class="bi bi-cart-plus text-primary me-2"></i>Create Customer Order
+          </h6>
+          <a href="{{ url_for('orders.index') }}" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Back to Orders
+          </a>
+        </div>
+
+        <div class="card-body p-4">
+          <form method="POST" novalidate>
+            {{ form.hidden_tag() }}
+
+            <h6 class="text-uppercase text-secondary fw-bold small mb-3 border-bottom pb-2">
+              <i class="bi bi-person me-1"></i> Customer Contact Information
+            </h6>
+
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label for="customer_name" class="form-label small fw-semibold text-secondary">Customer / Company Name *</label>
+                {{ form.customer_name(class="form-control" + (" is-invalid" if form.customer_name.errors else ""), placeholder="e.g. Acme Corporation") }}
+                {% if form.customer_name.errors %}
+                  <div class="invalid-feedback d-block">
+                    {% for error in form.customer_name.errors %}{{ error }}{% endfor %}
+                  </div>
+                {% endif %}
+              </div>
+
+              <div class="col-md-6">
+                <label for="customer_email" class="form-label small fw-semibold text-secondary">Customer Email Address *</label>
+                {{ form.customer_email(class="form-control" + (" is-invalid" if form.customer_email.errors else ""), placeholder="orders@acmecorp.com") }}
+                {% if form.customer_email.errors %}
+                  <div class="invalid-feedback d-block">
+                    {% for error in form.customer_email.errors %}{{ error }}{% endfor %}
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label for="customer_phone" class="form-label small fw-semibold text-secondary">Customer Phone *</label>
+                {{ form.customer_phone(class="form-control" + (" is-invalid" if form.customer_phone.errors else ""), placeholder="+1-312-555-0100") }}
+                {% if form.customer_phone.errors %}
+                  <div class="invalid-feedback d-block">
+                    {% for error in form.customer_phone.errors %}{{ error }}{% endfor %}
+                  </div>
+                {% endif %}
+              </div>
+
+              <div class="col-md-6">
+                <label for="expected_delivery_date" class="form-label small fw-semibold text-secondary">Target Delivery Date *</label>
+                {{ form.expected_delivery_date(class="form-control" + (" is-invalid" if form.expected_delivery_date.errors else "")) }}
+                {% if form.expected_delivery_date.errors %}
+                  <div class="invalid-feedback d-block">
+                    {% for error in form.expected_delivery_date.errors %}{{ error }}{% endfor %}
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <label for="delivery_address" class="form-label small fw-semibold text-secondary">Delivery Destination Address *</label>
+              {{ form.delivery_address(class="form-control" + (" is-invalid" if form.delivery_address.errors else ""), rows=2, placeholder="e.g. 742 Evergreen Terrace, Sector 4, Springfield") }}
+              {% if form.delivery_address.errors %}
+                <div class="invalid-feedback d-block">
+                  {% for error in form.delivery_address.errors %}{{ error }}{% endfor %}
+                </div>
+              {% endif %}
+            </div>
+
+            <h6 class="text-uppercase text-secondary fw-bold small mb-3 border-bottom pb-2">
+              <i class="bi bi-box-seam me-1"></i> Initial Order Line Item
+            </h6>
+
+            <div class="row g-3 mb-4">
+              <div class="col-md-8">
+                <label for="product_id" class="form-label small fw-semibold text-secondary">Product SKU *</label>
+                {{ form.product_id(class="form-select" + (" is-invalid" if form.product_id.errors else "")) }}
+                {% if form.product_id.errors %}
+                  <div class="invalid-feedback d-block">
+                    {% for error in form.product_id.errors %}{{ error }}{% endfor %}
+                  </div>
+                {% endif %}
+              </div>
+
+              <div class="col-md-4">
+                <label for="quantity" class="form-label small fw-semibold text-secondary">Quantity to Order *</label>
+                {{ form.quantity(class="form-control" + (" is-invalid" if form.quantity.errors else "")) }}
+                {% if form.quantity.errors %}
+                  <div class="invalid-feedback d-block">
+                    {% for error in form.quantity.errors %}{{ error }}{% endfor %}
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+              <a href="{{ url_for('orders.index') }}" class="btn btn-outline-secondary">Cancel</a>
+              <button type="submit" class="btn btn-primary px-4">
+                <i class="bi bi-check2-circle me-1"></i> Submit Customer Order
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

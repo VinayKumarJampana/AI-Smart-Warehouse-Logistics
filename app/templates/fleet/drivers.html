@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block title %}Fleet Drivers{% endblock %}
+{% block page_title %}Driver Management{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+
+  <!-- Search & Filter Card -->
+  <div class="card mb-4 p-3 bg-white">
+    <div class="row g-2 align-items-center justify-content-between">
+      <div class="col-md-7">
+        <form method="GET" action="{{ url_for('fleet.drivers') }}" class="row g-2">
+          <div class="col-sm-7">
+            <div class="input-group">
+              <span class="input-group-text bg-light"><i class="bi bi-search text-muted"></i></span>
+              <input type="text" name="search" class="form-control" placeholder="Search by name, license or phone..." value="{{ search_query }}">
+            </div>
+          </div>
+          <div class="col-sm-3">
+            <select name="status" class="form-select">
+              <option value="">All Statuses</option>
+              <option value="AVAILABLE" {% if status_filter == 'AVAILABLE' %}selected{% endif %}>Available</option>
+              <option value="ON_DUTY" {% if status_filter == 'ON_DUTY' %}selected{% endif %}>On Duty</option>
+              <option value="OFF_DUTY" {% if status_filter == 'OFF_DUTY' %}selected{% endif %}>Off Duty</option>
+            </select>
+          </div>
+          <div class="col-sm-2 d-flex gap-1">
+            <button type="submit" class="btn btn-primary" title="Filter"><i class="bi bi-funnel"></i></button>
+            {% if search_query or status_filter %}
+              <a href="{{ url_for('fleet.drivers') }}" class="btn btn-outline-secondary" title="Clear Filters"><i class="bi bi-x-lg"></i></a>
+            {% endif %}
+          </div>
+        </form>
+      </div>
+
+      <div class="col-md-4 text-md-end">
+        <a href="{{ url_for('fleet.create_driver') }}" class="btn btn-primary">
+          <i class="bi bi-person-plus me-1"></i> Add Driver
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Drivers Table -->
+  <div class="card shadow-sm">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Driver Name</th>
+              <th>CDL License Number</th>
+              <th>Phone Number</th>
+              <th>Availability Status</th>
+              <th>Assigned Vehicle</th>
+              <th>Trips Completed</th>
+              <th class="text-end pe-4">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if drivers %}
+              {% for d in drivers %}
+                <tr>
+                  <td>
+                    <div class="d-flex align-items-center">
+                      <div class="rounded-circle bg-secondary bg-opacity-10 text-primary d-flex align-items-center justify-content-center me-2" style="width: 34px; height: 34px;">
+                        <i class="bi bi-person-fill"></i>
+                      </div>
+                      <span class="fw-semibold text-dark">{{ d.name }}</span>
+                    </div>
+                  </td>
+                  <td><code>{{ d.license_number }}</code></td>
+                  <td><i class="bi bi-telephone text-muted me-1"></i> {{ d.phone }}</td>
+                  <td>
+                    {% if d.status == 'AVAILABLE' %}
+                      <span class="badge badge-subtle-success"><i class="bi bi-check-circle me-1"></i> AVAILABLE</span>
+                    {% elif d.status == 'ON_DUTY' %}
+                      <span class="badge badge-subtle-info"><i class="bi bi-steering-wheel me-1"></i> ON DUTY</span>
+                    {% else %}
+                      <span class="badge badge-subtle-warning"><i class="bi bi-moon me-1"></i> OFF DUTY</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if d.assigned_vehicle %}
+                      <span class="badge bg-dark font-monospace">{{ d.assigned_vehicle.plate_number }}</span>
+                      <small class="text-muted d-block">{{ d.assigned_vehicle.vehicle_type }}</small>
+                    {% else %}
+                      <span class="text-muted small">None assigned</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <span class="badge bg-light text-dark border">{{ d.dispatches.count() }} dispatches</span>
+                  </td>
+                  <td class="text-end pe-4">
+                    <div class="btn-group btn-group-sm">
+                      <a href="{{ url_for('fleet.edit_driver', id=d.id) }}" class="btn btn-outline-primary" title="Edit Driver">
+                        <i class="bi bi-pencil"></i>
+                      </a>
+                      {% if current_user.role == 'admin' %}
+                        <form method="POST" action="{{ url_for('fleet.delete_driver', id=d.id) }}" class="d-inline" onsubmit="return confirm('Are you sure you want to delete driver {{ d.name }}?');">
+                          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                          <button type="submit" class="btn btn-outline-danger" title="Delete Driver">
+                            <i class="bi bi-trash"></i>
+                          </button>
+                        </form>
+                      {% endif %}
+                    </div>
+                  </td>
+                </tr>
+              {% endfor %}
+            {% else %}
+              <tr>
+                <td colspan="7" class="text-center py-5 text-muted">
+                  <i class="bi bi-person-badge fs-1 d-block mb-2"></i>
+                  No drivers registered yet. Click "Add Driver" to register one.
+                </td>
+              </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

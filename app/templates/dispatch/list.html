@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}Dispatches & Delivery Tracking{% endblock %}
+{% block page_title %}Shipment Dispatches & Tracking{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+
+  <!-- Search & Filter Card -->
+  <div class="card mb-4 p-3 bg-white">
+    <div class="row g-2 align-items-center justify-content-between">
+      <div class="col-md-8">
+        <form method="GET" action="{{ url_for('dispatch.index') }}" class="row g-2">
+          <div class="col-sm-6">
+            <div class="input-group">
+              <span class="input-group-text bg-light"><i class="bi bi-search text-muted"></i></span>
+              <input type="text" name="search" class="form-control" placeholder="Search tracking #, order, customer, plate..." value="{{ search_query }}">
+            </div>
+          </div>
+          <div class="col-sm-4">
+            <select name="status" class="form-select">
+              <option value="">All Shipment Statuses</option>
+              <option value="DISPATCHED" {% if status_filter == 'DISPATCHED' %}selected{% endif %}>DISPATCHED</option>
+              <option value="IN_TRANSIT" {% if status_filter == 'IN_TRANSIT' %}selected{% endif %}>IN TRANSIT</option>
+              <option value="DELIVERED" {% if status_filter == 'DELIVERED' %}selected{% endif %}>DELIVERED</option>
+              <option value="FAILED" {% if status_filter == 'FAILED' %}selected{% endif %}>FAILED</option>
+            </select>
+          </div>
+          <div class="col-sm-2 d-flex gap-1">
+            <button type="submit" class="btn btn-primary" title="Filter"><i class="bi bi-funnel"></i></button>
+            {% if search_query or status_filter %}
+              <a href="{{ url_for('dispatch.index') }}" class="btn btn-outline-secondary" title="Clear Filters"><i class="bi bi-x-lg"></i></a>
+            {% endif %}
+          </div>
+        </form>
+      </div>
+
+      <div class="col-md-4 text-md-end">
+        <a href="{{ url_for('dispatch.create') }}" class="btn btn-primary">
+          <i class="bi bi-send-plus me-1"></i> New Dispatch Shipment
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dispatches Table -->
+  <div class="card shadow-sm">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Tracking Code</th>
+              <th>Customer Order</th>
+              <th>Origin Facility</th>
+              <th>Vehicle & Driver</th>
+              <th>Dispatch Time</th>
+              <th>Est. Delivery</th>
+              <th>Shipment Status</th>
+              <th class="text-end pe-4">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if dispatches %}
+              {% for d in dispatches %}
+                <tr>
+                  <td>
+                    <a href="{{ url_for('dispatch.track', id=d.id) }}" class="fw-bold font-monospace text-primary text-decoration-none">
+                      {{ d.tracking_code }}
+                    </a>
+                  </td>
+                  <td>
+                    <a href="{{ url_for('orders.detail', id=d.order.id) }}" class="fw-semibold text-dark text-decoration-none">
+                      {{ d.order.order_number }}
+                    </a>
+                    <div class="small text-muted">{{ d.order.customer_name }}</div>
+                  </td>
+                  <td><span class="small text-muted">{{ d.warehouse.name }} ({{ d.warehouse.code }})</span></td>
+                  <td>
+                    <span class="badge bg-dark font-monospace">{{ d.vehicle.plate_number }}</span>
+                    <div class="small text-muted"><i class="bi bi-person me-1"></i>{{ d.driver.name }}</div>
+                  </td>
+                  <td class="small text-muted">{{ d.dispatch_time.strftime('%Y-%m-%d %H:%M') }}</td>
+                  <td class="small fw-medium">{{ d.estimated_delivery.strftime('%Y-%m-%d %H:%M') }}</td>
+                  <td>
+                    {% if d.status == 'DISPATCHED' %}
+                      <span class="badge badge-subtle-primary"><i class="bi bi-box-arrow-right me-1"></i> DISPATCHED</span>
+                    {% elif d.status == 'IN_TRANSIT' %}
+                      <span class="badge badge-subtle-info"><i class="bi bi-arrow-repeat me-1"></i> IN TRANSIT</span>
+                    {% elif d.status == 'DELIVERED' %}
+                      <span class="badge badge-subtle-success"><i class="bi bi-check-all me-1"></i> DELIVERED</span>
+                    {% else %}
+                      <span class="badge badge-subtle-danger"><i class="bi bi-exclamation-octagon me-1"></i> FAILED</span>
+                    {% endif %}
+                  </td>
+                  <td class="text-end pe-4">
+                    <a href="{{ url_for('dispatch.track', id=d.id) }}" class="btn btn-sm btn-outline-primary" title="Track Shipment">
+                      <i class="bi bi-geo-alt"></i> Track
+                    </a>
+                  </td>
+                </tr>
+              {% endfor %}
+            {% else %}
+              <tr>
+                <td colspan="8" class="text-center py-5 text-muted">
+                  <i class="bi bi-send-x fs-1 d-block mb-2"></i>
+                  No dispatches recorded. Click "New Dispatch Shipment" to launch one.
+                </td>
+              </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

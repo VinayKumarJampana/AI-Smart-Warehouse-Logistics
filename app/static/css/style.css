@@ -1,0 +1,175 @@
+/* ==============================================================================
+   SMART LOGISTICS MANAGEMENT SYSTEM - MAIN STYLESHEET
+   ============================================================================== */
+
+:root {
+  --primary-color: #1e3a8a;
+  --primary-hover: #1d4ed8;
+  --sidebar-bg: #0f172a;
+  --sidebar-hover: #1e293b;
+  --sidebar-active: #3b82f6;
+  --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  --card-hover-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background-color: #f8fafc;
+  color: #1e293b;
+  min-height: 100vh;
+}
+
+/* Sidebar Styling */
+#sidebar {
+  min-width: 260px;
+  max-width: 260px;
+  background-color: var(--sidebar-bg);
+  min-height: 100vh;
+  transition: all 0.3s;
+  z-index: 100;
+}
+
+#sidebar .nav-link {
+  color: #94a3b8;
+  font-size: 0.925rem;
+  font-weight: 500;
+  padding: 0.75rem 1.25rem;
+  border-radius: 0.5rem;
+  margin: 0.15rem 0.75rem;
+  display: flex;
+  align-items: center;
+  transition: all 0.2s ease-in-out;
+}
+
+#sidebar .nav-link i {
+  font-size: 1.15rem;
+  margin-right: 0.75rem;
+}
+
+#sidebar .nav-link:hover {
+  color: #ffffff;
+  background-color: var(--sidebar-hover);
+}
+
+#sidebar .nav-link.active {
+  color: #ffffff;
+  background-color: var(--sidebar-active);
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.sidebar-heading {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #64748b;
+  font-weight: 700;
+  padding: 1.25rem 1.25rem 0.5rem;
+}
+
+/* Header & Navbar */
+.top-navbar {
+  background-color: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 0.75rem 1.5rem;
+}
+
+/* Cards & UI Elements */
+.card {
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  box-shadow: var(--card-shadow);
+  transition: box-shadow 0.2s ease-in-out;
+}
+
+.card:hover {
+  box-shadow: var(--card-hover-shadow);
+}
+
+.metric-card {
+  border-left: 4px solid var(--primary-color);
+}
+
+.metric-card.warning-card {
+  border-left-color: #f59e0b;
+}
+
+.metric-card.success-card {
+  border-left-color: #10b981;
+}
+
+.metric-card.danger-card {
+  border-left-color: #ef4444;
+}
+
+.metric-card.info-card {
+  border-left-color: #06b6d4;
+}
+
+.metric-icon-bg {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+/* Tables */
+.table th {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+  background-color: #f8fafc;
+  border-top: none;
+}
+
+.table td {
+  vertical-align: middle;
+  font-size: 0.9rem;
+}
+
+/* Badges */
+.badge-subtle-success {
+  background-color: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+.badge-subtle-danger {
+  background-color: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+.badge-subtle-warning {
+  background-color: #fffbeb;
+  color: #92400e;
+  border: 1px solid #fde68a;
+}
+
+.badge-subtle-info {
+  background-color: #f0fdfa;
+  color: #115e59;
+  border: 1px solid #99f6e4;
+}
+
+/* Auth Cards */
+.auth-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 440px;
+  background-color: #ffffff;
+  border-radius: 1rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+}

@@ -1,0 +1,301 @@
+
+{% extends "base.html" %}
+
+{% block title %}Analytics & Reports{% endblock %}
+{% block page_title %}Analytics & Reports{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+
+  <!-- KPI Cards -->
+  <div class="row g-3 mb-4">
+
+    <div class="col-xl-3 col-md-6">
+      <div class="card metric-card p-3 h-100">
+        <span class="text-muted small text-uppercase">Total Orders</span>
+        <h3 class="fw-bold mb-0 mt-2">{{ total_orders }}</h3>
+        <span class="small text-muted">All recorded orders</span>
+      </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+      <div class="card metric-card p-3 h-100">
+        <span class="text-muted small text-uppercase">Delivered Orders</span>
+        <h3 class="fw-bold text-success mb-0 mt-2">{{ delivered_orders }}</h3>
+        <span class="small text-muted">Successfully delivered</span>
+      </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+      <div class="card metric-card p-3 h-100">
+        <span class="text-muted small text-uppercase">Pending Orders</span>
+        <h3 class="fw-bold text-warning mb-0 mt-2">{{ pending_orders }}</h3>
+        <span class="small text-muted">Awaiting processing</span>
+      </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+      <div class="card metric-card p-3 h-100">
+        <span class="text-muted small text-uppercase">Delivered Revenue</span>
+        <h3 class="fw-bold text-primary mb-0 mt-2">
+          ₹{{ "{:,.2f}".format(total_revenue) }}
+        </h3>
+        <span class="small text-muted">Delivered orders only</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Sales and Stock Charts -->
+  <div class="row g-4 mb-4">
+
+    <div class="col-lg-7">
+      <div class="card h-100">
+        <div class="card-header bg-white py-3">
+          <h6 class="fw-bold mb-0">
+            <i class="bi bi-graph-up text-primary me-2"></i>
+            Monthly Sales Trend
+          </h6>
+          <small class="text-muted">Delivered order revenue for the last 6 months</small>
+        </div>
+        <div class="card-body">
+          <canvas id="salesChart" height="120"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-5">
+      <div class="card h-100">
+        <div class="card-header bg-white py-3">
+          <h6 class="fw-bold mb-0">
+            <i class="bi bi-box-seam text-success me-2"></i>
+            Stock Movement Summary
+          </h6>
+        </div>
+        <div class="card-body">
+          <canvas id="stockChart" height="180"></canvas>
+
+          <div class="d-flex justify-content-around mt-3 text-center">
+            <div>
+              <h5 class="fw-bold text-success">{{ stock_in }}</h5>
+              <small class="text-muted">Stock In</small>
+            </div>
+            <div>
+              <h5 class="fw-bold text-danger">{{ stock_out }}</h5>
+              <small class="text-muted">Stock Out</small>
+            </div>
+            <div>
+              <h5 class="fw-bold text-warning">{{ adjustments }}</h5>
+              <small class="text-muted">Adjustments</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Warehouse and AI Forecast -->
+  <div class="row g-4 mb-4">
+
+    <div class="col-lg-6">
+      <div class="card h-100">
+        <div class="card-header bg-white py-3">
+          <h6 class="fw-bold mb-0">
+            <i class="bi bi-building text-primary me-2"></i>
+            Warehouse Stock Distribution
+          </h6>
+        </div>
+        <div class="card-body">
+          {% if warehouse_labels %}
+            <canvas id="warehouseChart" height="180"></canvas>
+          {% else %}
+            <p class="text-muted text-center py-4">No warehouse data available.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="card h-100">
+        <div class="card-header bg-white py-3">
+          <h6 class="fw-bold mb-0">
+            <i class="bi bi-robot text-primary me-2"></i>
+            AI Forecast Summary
+          </h6>
+        </div>
+        <div class="card-body">
+
+          <div class="row g-3 text-center">
+
+            <div class="col-6">
+              <div class="bg-light rounded p-3">
+                <h3 class="fw-bold">{{ forecast_summary.total }}</h3>
+                <small class="text-muted">Total Forecasts</small>
+              </div>
+            </div>
+
+            <div class="col-6">
+              <div class="bg-light rounded p-3">
+                <h3 class="fw-bold text-danger">{{ forecast_summary.critical }}</h3>
+                <small class="text-muted">Critical</small>
+              </div>
+            </div>
+
+            <div class="col-6">
+              <div class="bg-light rounded p-3">
+                <h3 class="fw-bold text-warning">{{ forecast_summary.moderate }}</h3>
+                <small class="text-muted">Moderate</small>
+              </div>
+            </div>
+
+            <div class="col-6">
+              <div class="bg-light rounded p-3">
+                <h3 class="fw-bold text-success">{{ forecast_summary.safe }}</h3>
+                <small class="text-muted">Safe</small>
+              </div>
+            </div>
+
+          </div>
+
+          <a href="{{ url_for('ai.forecast') }}" class="btn btn-primary btn-sm mt-3">
+            Open Demand Forecast
+          </a>
+
+          <a href="{{ url_for('ai.forecast_history') }}" class="btn btn-outline-primary btn-sm mt-3">
+            Forecast History
+          </a>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Latest Forecast Records -->
+  <div class="card mb-4">
+    <div class="card-header bg-white py-3">
+      <h6 class="fw-bold mb-0">Latest AI Forecast Records</h6>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Forecast Days</th>
+            <th>Predicted Demand</th>
+            <th>Safety Stock</th>
+            <th>Reorder Point</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for item in latest_forecasts %}
+          <tr>
+            <td>{{ item.product.name }}</td>
+            <td>{{ item.forecast_days }} Days</td>
+            <td>{{ item.predicted_demand }} Units</td>
+            <td>{{ item.calculated_safety_stock }} Units</td>
+            <td>{{ item.reorder_point }} Units</td>
+            <td>
+              {% if item.urgency_status == "CRITICAL" %}
+                <span class="badge bg-danger">CRITICAL</span>
+              {% elif item.urgency_status == "MODERATE" %}
+                <span class="badge bg-warning text-dark">MODERATE</span>
+              {% else %}
+                <span class="badge bg-success">SAFE</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="6" class="text-center text-muted py-4">
+              No forecast records available.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+
+<script>
+  const salesLabels = {{ monthly_labels | tojson }};
+  const salesValues = {{ monthly_sales | tojson }};
+
+  new Chart(document.getElementById("salesChart"), {
+    type: "line",
+    data: {
+      labels: salesLabels,
+      datasets: [{
+        label: "Revenue (₹)",
+        data: salesValues,
+        borderColor: "#0d6efd",
+        backgroundColor: "rgba(13,110,253,0.12)",
+        fill: true,
+        tension: 0.35
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: true }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            callback: value => "₹" + value.toLocaleString("en-IN")
+          }
+        }
+      }
+    }
+  });
+
+  new Chart(document.getElementById("stockChart"), {
+    type: "doughnut",
+    data: {
+      labels: ["Stock In", "Stock Out"],
+      datasets: [{
+        data: [{{ stock_in }}, {{ stock_out }}],
+        backgroundColor: ["#198754", "#dc3545"]
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: "bottom" }
+      }
+    }
+  });
+
+  {% if warehouse_labels %}
+  new Chart(document.getElementById("warehouseChart"), {
+    type: "bar",
+    data: {
+      labels: {{ warehouse_labels | tojson }},
+      datasets: [{
+        label: "Current Stock Units",
+        data: {{ warehouse_stock | tojson }},
+        backgroundColor: "#0d6efd"
+      }]
+    },
+    options: {
+      responsive: true,
+      indexAxis: "y",
+      scales: {
+        x: { beginAtZero: true }
+      }
+    }
+  });
+  {% endif %}
+</script>
+{% endblock %}

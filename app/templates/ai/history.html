@@ -1,0 +1,150 @@
+
+{% extends "base.html" %}
+
+{% block title %}Forecast History{% endblock %}
+{% block page_title %}AI Forecast History{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2>
+                <i class="bi bi-clock-history me-2"></i>
+                AI Forecast History
+            </h2>
+            <p class="text-muted">
+                Previously generated demand forecasts, inventory recommendations
+                and model evaluation details
+            </p>
+        </div>
+
+        <a href="{{ url_for('ai.forecast') }}" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-1"></i>
+            Generate New Forecast
+        </a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            {% if records %}
+            <div class="table-responsive">
+                <table class="table table-striped table-hover align-middle">
+
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Product</th>
+                            <th>Model</th>
+                            <th>Forecast Days</th>
+                            <th>Predicted Demand</th>
+                            <th>Safety Stock</th>
+                            <th>Reorder Point</th>
+                            <th>Training Size</th>
+                            <th>Testing Size</th>
+                            <th>MAE</th>
+                            <th>RMSE</th>
+                            <th>Reorder Qty</th>
+                            <th>Urgency</th>
+                            <th>Generated At</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for record in records %}
+                        <tr>
+                            <td>{{ record.id }}</td>
+
+                            <td>
+                                <strong>{{ record.product.name }}</strong>
+                                <br>
+                                <small class="text-muted">
+                                    {{ record.product.sku }}
+                                </small>
+                            </td>
+
+                            <td>{{ record.model_name }}</td>
+
+                            <td>
+                                <span class="badge bg-info text-dark">
+                                    {{ record.forecast_days }} Days
+                                </span>
+                            </td>
+
+                            <td>
+                                <strong>
+                                    {{ record.predicted_demand }} Units
+                                </strong>
+                            </td>
+
+                            <td>
+                                {{ record.calculated_safety_stock }} Units
+                            </td>
+
+                            <td>
+                                {{ record.reorder_point }} Units
+                            </td>
+
+                            <td>
+                                {{ "{:,}".format(record.train_size) }}
+                            </td>
+
+                            <td>
+                                {{ "{:,}".format(record.test_size) }}
+                            </td>
+
+                            <td>
+                                {{ "%.4f"|format(record.mae) }}
+                            </td>
+
+                            <td>
+                                {{ "%.4f"|format(record.rmse) }}
+                            </td>
+
+                            <td>
+                                <strong>
+                                    {{ record.recommended_reorder_qty }} Units
+                                </strong>
+                            </td>
+
+                            <td>
+                                {% if record.urgency_status == 'CRITICAL' %}
+                                    <span class="badge bg-danger">CRITICAL</span>
+                                {% elif record.urgency_status == 'MODERATE' %}
+                                    <span class="badge bg-warning text-dark">MODERATE</span>
+                                {% else %}
+                                    <span class="badge bg-success">SAFE</span>
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {{ record.last_evaluated_at.strftime('%d-%m-%Y %H:%M') }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+
+                </table>
+            </div>
+
+            {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-clipboard-data fs-1 text-muted"></i>
+                <h5 class="mt-3">No Forecast History Found</h5>
+                <p class="text-muted">
+                    Generate your first demand forecast.
+                </p>
+
+                <a href="{{ url_for('ai.forecast') }}"
+                   class="btn btn-primary mt-2">
+                    Generate Forecast
+                </a>
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}

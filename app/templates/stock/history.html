@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block title %}Stock Audit Trail{% endblock %}
+{% block page_title %}Stock Movement Audit Trail{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+
+  <!-- Filter Card -->
+  <div class="card mb-4 p-3 bg-white">
+    <form method="GET" action="{{ url_for('stock.history') }}" class="row g-2 align-items-center">
+      <div class="col-md-3">
+        <select name="type" class="form-select">
+          <option value="">All Movement Types</option>
+          <option value="STOCK_IN" {% if selected_type == 'STOCK_IN' %}selected{% endif %}>STOCK IN (Receipts)</option>
+          <option value="STOCK_OUT" {% if selected_type == 'STOCK_OUT' %}selected{% endif %}>STOCK OUT (Dispatches)</option>
+          <option value="ADJUSTMENT" {% if selected_type == 'ADJUSTMENT' %}selected{% endif %}>ADJUSTMENTS</option>
+        </select>
+      </div>
+
+      <div class="col-md-4">
+        <select name="product_id" class="form-select">
+          <option value="">All Products / SKUs</option>
+          {% for p in products %}
+            <option value="{{ p.id }}" {% if selected_product == p.id %}selected{% endif %}>{{ p.name }} ({{ p.sku }})</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-md-3 d-flex gap-1">
+        <button type="submit" class="btn btn-primary">Apply Filters</button>
+        {% if selected_type or selected_product %}
+          <a href="{{ url_for('stock.history') }}" class="btn btn-outline-secondary" title="Clear Filters"><i class="bi bi-x-lg"></i></a>
+        {% endif %}
+      </div>
+
+      <div class="col-md-2 text-md-end">
+        <div class="btn-group">
+          <a href="{{ url_for('stock.stock_in') }}" class="btn btn-sm btn-success" title="Stock In">
+            <i class="bi bi-plus-lg"></i> In
+          </a>
+          <a href="{{ url_for('stock.stock_out') }}" class="btn btn-sm btn-danger" title="Stock Out">
+            <i class="bi bi-dash-lg"></i> Out
+          </a>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Audit Table -->
+  <div class="card">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>Movement Type</th>
+              <th>Product / SKU</th>
+              <th>Warehouse</th>
+              <th>Quantity</th>
+              <th>Balance After</th>
+              <th>Reference #</th>
+              <th>Operator</th>
+              <th>Notes / Remarks</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if transactions.items %}
+              {% for txn in transactions.items %}
+                <tr>
+                  <td class="small text-muted font-monospace">{{ txn.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                  <td>
+                    {% if txn.transaction_type == 'STOCK_IN' %}
+                      <span class="badge badge-subtle-success"><i class="bi bi-arrow-down-right"></i> STOCK IN</span>
+                    {% elif txn.transaction_type == 'STOCK_OUT' %}
+                      <span class="badge badge-subtle-danger"><i class="bi bi-arrow-up-right"></i> STOCK OUT</span>
+                    {% else %}
+                      <span class="badge badge-subtle-warning">{{ txn.transaction_type }}</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <a href="{{ url_for('inventory.detail', id=txn.product.id) }}" class="fw-semibold text-dark text-decoration-none">
+                      {{ txn.product.name }}
+                    </a>
+                    <div class="small text-muted font-monospace">{{ txn.product.sku }}</div>
+                  </td>
+                  <td><span class="small text-muted">{{ txn.warehouse.code }}</span></td>
+                  <td class="fw-bold {% if txn.transaction_type == 'STOCK_IN' %}text-success{% else %}text-danger{% endif %}">
+                    {% if txn.transaction_type == 'STOCK_IN' %}+{% else %}-{% endif %}{{ txn.quantity }} {{ txn.product.unit }}
+                  </td>
+                  <td class="fw-semibold">{{ txn.balance_after }} {{ txn.product.unit }}</td>
+                  <td><code class="small text-secondary">{{ txn.reference_no or '—' }}</code></td>
+                  <td><span class="small"><i class="bi bi-person text-muted me-1"></i>{{ txn.creator.username }}</span></td>
+                  <td class="small text-muted text-truncate" style="max-width: 200px;">{{ txn.notes or '—' }}</td>
+                </tr>
+              {% endfor %}
+            {% else %}
+              <tr>
+                <td colspan="9" class="text-center py-5 text-muted">
+                  <i class="bi bi-clock-history fs-1 d-block mb-2"></i>
+                  No stock movements found matching your criteria.
+                </td>
+              </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      {% if transactions.pages > 1 %}
+        <div class="card-footer bg-white d-flex justify-content-between align-items-center py-3">
+          <span class="small text-muted">
+            Page {{ transactions.page }} of {{ transactions.pages }} ({{ transactions.total }} total movements)
+          </span>
+          <nav>
+            <ul class="pagination pagination-sm mb-0">
+              {% if transactions.has_prev %}
+                <li class="page-item">
+                  <a class="page-link" href="{{ url_for('stock.history', page=transactions.prev_num, type=selected_type, product_id=selected_product) }}">Previous</a>
+                </li>
+              {% else %}
+                <li class="page-item disabled"><span class="page-link">Previous</span></li>
+              {% endif %}
+
+              {% for p in transactions.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=1) %}
+                {% if p %}
+                  <li class="page-item {% if p == transactions.page %}active{% endif %}">
+                    <a class="page-link" href="{{ url_for('stock.history', page=p, type=selected_type, product_id=selected_product) }}">{{ p }}</a>
+                  </li>
+                {% else %}
+                  <li class="page-item disabled"><span class="page-link">&hellip;</span></li>
+                {% endif %}
+              {% endfor %}
+
+              {% if transactions.has_next %}
+                <li class="page-item">
+                  <a class="page-link" href="{{ url_for('stock.history', page=transactions.next_num, type=selected_type, product_id=selected_product) }}">Next</a>
+                </li>
+              {% else %}
+                <li class="page-item disabled"><span class="page-link">Next</span></li>
+              {% endif %}
+            </ul>
+          </nav>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}Launch Dispatch Shipment{% endblock %}
+{% block page_title %}New Dispatch Shipment{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card shadow-sm">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+          <h6 class="mb-0 fw-bold">
+            <i class="bi bi-send-plus text-primary me-2"></i>Assign Resources & Launch Shipment
+          </h6>
+          <a href="{{ url_for('dispatch.index') }}" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Back to Dispatches
+          </a>
+        </div>
+
+        <div class="card-body p-4">
+          <!-- Availability Warning Checklist -->
+          {% if not has_approved_orders %}
+            <div class="alert alert-warning py-2 small mb-3">
+              <i class="bi bi-exclamation-triangle me-1"></i>
+              <strong>No Approved Orders:</strong> There are no customer orders in <code>APPROVED</code> status awaiting dispatch.
+              <a href="{{ url_for('orders.index', status='PENDING') }}" class="alert-link ms-1">Review pending orders &rarr;</a>
+            </div>
+          {% endif %}
+          {% if not has_vehicles %}
+            <div class="alert alert-danger py-2 small mb-3">
+              <i class="bi bi-truck me-1"></i>
+              <strong>No Vehicles Available:</strong> All fleet vehicles are currently in transit or under maintenance.
+              <a href="{{ url_for('fleet.create_vehicle') }}" class="alert-link ms-1">Add vehicle &rarr;</a>
+            </div>
+          {% endif %}
+          {% if not has_drivers %}
+            <div class="alert alert-danger py-2 small mb-3">
+              <i class="bi bi-person-badge me-1"></i>
+              <strong>No Drivers Available:</strong> All drivers are currently on duty or off duty.
+              <a href="{{ url_for('fleet.create_driver') }}" class="alert-link ms-1">Add driver &rarr;</a>
+            </div>
+          {% endif %}
+
+          <form method="POST" novalidate>
+            {{ form.hidden_tag() }}
+
+            <div class="mb-3">
+              <label for="order_id" class="form-label small fw-semibold text-secondary">Target Approved Customer Order *</label>
+              {{ form.order_id(class="form-select" + (" is-invalid" if form.order_id.errors else "")) }}
+              {% if form.order_id.errors %}
+                <div class="invalid-feedback d-block">
+                  {% for error in form.order_id.errors %}{{ error }}{% endfor %}
+                </div>
+              {% endif %}
+            </div>
+
+            <div class="mb-3">
+              <label for="warehouse_id" class="form-label small fw-semibold text-secondary">Fulfillment Origin Warehouse *</label>
+              {{ form.warehouse_id(class="form-select" + (" is-invalid" if form.warehouse_id.errors else "")) }}
+              {% if form.warehouse_id.errors %}
+                <div class="invalid-feedback d-block">
+                  {% for error in form.warehouse_id.errors %}{{ error }}{% endfor %}
+                </div>
+              {% endif %}
+            </div>
+
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label for="vehicle_id" class="form-label small fw-semibold text-secondary">Assign Available Vehicle *</label>
+                {{ form.vehicle_id(class="form-select" + (" is-invalid" if form.vehicle_id.errors else "")) }}
+                {% if form.vehicle_id.errors %}
+                  <div class="invalid-feedback d-block">
+                    {% for error in form.vehicle_id.errors %}{{ error }}{% endfor %}
+                  </div>
+                {% endif %}
+              </div>
+
+              <div class="col-md-6">
+                <label for="driver_id" class="form-label small fw-semibold text-secondary">Assign Available Driver *</label>
+                {{ form.driver_id(class="form-select" + (" is-invalid" if form.driver_id.errors else "")) }}
+                {% if form.driver_id.errors %}
+                  <div class="invalid-feedback d-block">
+                    {% for error in form.driver_id.errors %}{{ error }}{% endfor %}
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="estimated_delivery" class="form-label small fw-semibold text-secondary">Estimated Delivery Date & Time *</label>
+              {{ form.estimated_delivery(class="form-control" + (" is-invalid" if form.estimated_delivery.errors else "")) }}
+              {% if form.estimated_delivery.errors %}
+                <div class="invalid-feedback d-block">
+                  {% for error in form.estimated_delivery.errors %}{{ error }}{% endfor %}
+                </div>
+              {% endif %}
+            </div>
+
+            <div class="mb-4">
+              <label for="notes" class="form-label small fw-semibold text-secondary">Routing & Delivery Instructions</label>
+              {{ form.notes(class="form-control" + (" is-invalid" if form.notes.errors else ""), rows=2, placeholder="e.g. Call customer 30 mins prior to arrival at gate #2") }}
+              {% if form.notes.errors %}
+                <div class="invalid-feedback d-block">
+                  {% for error in form.notes.errors %}{{ error }}{% endfor %}
+                </div>
+              {% endif %}
+            </div>
+
+            <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+              <a href="{{ url_for('dispatch.index') }}" class="btn btn-outline-secondary">Cancel</a>
+              <button type="submit" class="btn btn-primary px-4" {% if not has_approved_orders or not has_vehicles or not has_drivers %}disabled{% endif %}>
+                <i class="bi bi-send-check me-1"></i> Confirm & Launch Dispatch
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

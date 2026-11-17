@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Create Staff Account{% endblock %}
+{% block page_title %}Create Staff Account{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+  <div class="row justify-content-center">
+    <div class="col-lg-7">
+      <div class="card shadow-sm">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+          <h6 class="mb-0 fw-bold">
+            <i class="bi bi-person-plus text-primary me-2"></i>Create New Staff Account
+          </h6>
+          <a href="{{ url_for('auth.list_users') }}" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Back to Users
+          </a>
+        </div>
+
+        <div class="card-body p-4">
+          <form method="POST" novalidate>
+            {{ form.hidden_tag() }}
+
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label for="username" class="form-label small fw-semibold text-secondary">Username *</label>
+                {{ form.username(class="form-control" + (" is-invalid" if form.username.errors else ""), placeholder="e.g. jdoe") }}
+                {% if form.username.errors %}
+                  <div class="invalid-feedback d-block">
+                    {% for error in form.username.errors %}{{ error }}{% endfor %}
+                  </div>
+                {% endif %}
+              </div>
+
+              <div class="col-md-6">
+                <label for="email" class="form-label small fw-semibold text-secondary">Email Address *</label>
+                {{ form.email(class="form-control" + (" is-invalid" if form.email.errors else ""), placeholder="jdoe@logistics.com") }}
+                {% if form.email.errors %}
+                  <div class="invalid-feedback d-block">
+                    {% for error in form.email.errors %}{{ error }}{% endfor %}
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label for="password" class="form-label small fw-semibold text-secondary">Initial Password *</label>
+                {{ form.password(class="form-control" + (" is-invalid" if form.password.errors else ""), placeholder="••••••••") }}
+                {% if form.password.errors %}
+                  <div class="invalid-feedback d-block">
+                    {% for error in form.password.errors %}{{ error }}{% endfor %}
+                  </div>
+                {% endif %}
+              </div>
+
+              <div class="col-md-6">
+                <label for="confirm_password" class="form-label small fw-semibold text-secondary">Confirm Password *</label>
+                {{ form.confirm_password(class="form-control" + (" is-invalid" if form.confirm_password.errors else ""), placeholder="••••••••") }}
+                {% if form.confirm_password.errors %}
+                  <div class="invalid-feedback d-block">
+                    {% for error in form.confirm_password.errors %}{{ error }}{% endfor %}
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <label for="role" class="form-label small fw-semibold text-secondary">Authorized Role Tier *</label>
+              {{ form.role(class="form-select") }}
+              <small class="text-muted">
+                Admins have full system authority. Warehouse Managers control facilities & stock. Coordinators manage orders & dispatch.
+              </small>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+              <a href="{{ url_for('auth.list_users') }}" class="btn btn-outline-secondary">Cancel</a>
+              <button type="submit" class="btn btn-primary px-4">
+                <i class="bi bi-check2-circle me-1"></i> Create Account
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

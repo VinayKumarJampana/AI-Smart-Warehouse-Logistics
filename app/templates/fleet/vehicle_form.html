@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+  <div class="row justify-content-center">
+    <div class="col-lg-7">
+      <div class="card shadow-sm">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+          <h6 class="mb-0 fw-bold">
+            <i class="bi bi-truck text-primary me-2"></i>
+            {% if is_edit %}Edit Vehicle: {{ vehicle.plate_number }}{% else %}Register New Fleet Vehicle{% endif %}
+          </h6>
+          <a href="{{ url_for('fleet.vehicles') }}" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Back to Fleet
+          </a>
+        </div>
+
+        <div class="card-body p-4">
+          <form method="POST" novalidate>
+            {{ form.hidden_tag() }}
+
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label for="plate_number" class="form-label small fw-semibold text-secondary">License Plate / Vehicle # *</label>
+                {{ form.plate_number(class="form-control text-uppercase" + (" is-invalid" if form.plate_number.errors else ""), placeholder="e.g. TRK-IL-9801") }}
+                {% if form.plate_number.errors %}
+                  <div class="invalid-feedback d-block">
+                    {% for error in form.plate_number.errors %}{{ error }}{% endfor %}
+                  </div>
+                {% endif %}
+              </div>
+
+              <div class="col-md-6">
+                <label for="vehicle_type" class="form-label small fw-semibold text-secondary">Vehicle Classification *</label>
+                {{ form.vehicle_type(class="form-select") }}
+                {% if form.vehicle_type.errors %}
+                  <div class="invalid-feedback d-block">
+                    {% for error in form.vehicle_type.errors %}{{ error }}{% endfor %}
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="row g-3 mb-4">
+              <div class="col-md-6">
+                <label for="capacity_kg" class="form-label small fw-semibold text-secondary">Max Cargo Payload (kg) *</label>
+                <div class="input-group">
+                  {{ form.capacity_kg(class="form-control" + (" is-invalid" if form.capacity_kg.errors else ""), placeholder="1500.00") }}
+                  <span class="input-group-text">kg</span>
+                </div>
+                {% if form.capacity_kg.errors %}
+                  <div class="invalid-feedback d-block">
+                    {% for error in form.capacity_kg.errors %}{{ error }}{% endfor %}
+                  </div>
+                {% endif %}
+              </div>
+
+              <div class="col-md-6">
+                <label for="status" class="form-label small fw-semibold text-secondary">Initial Operational Status *</label>
+                {{ form.status(class="form-select") }}
+                {% if form.status.errors %}
+                  <div class="invalid-feedback d-block">
+                    {% for error in form.status.errors %}{{ error }}{% endfor %}
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+              <a href="{{ url_for('fleet.vehicles') }}" class="btn btn-outline-secondary">Cancel</a>
+              <button type="submit" class="btn btn-primary px-4">
+                <i class="bi bi-check2-circle me-1"></i> Save Vehicle
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

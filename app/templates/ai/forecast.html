@@ -1,0 +1,270 @@
+
+{% extends "base.html" %}
+
+{% block title %}AI Demand Forecasting{% endblock %}
+{% block page_title %}AI Demand Forecasting{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+
+    <!-- Forecast Form -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h5 class="fw-bold">
+                <i class="bi bi-cpu me-2"></i>
+                AI-Powered Demand Forecast
+            </h5>
+
+            <p class="text-muted">
+                Predict future product demand and identify stock
+                replenishment requirements using Machine Learning.
+            </p>
+
+            <div class="alert alert-info">
+                <strong>Model:</strong> Random Forest Regressor
+                <br>
+                <strong>Dataset:</strong> Store Item Demand Forecasting
+                <br>
+                <small>
+                    Demonstration dataset; not actual warehouse sales history.
+                </small>
+            </div>
+
+            <form method="POST" action="{{ url_for('ai.forecast') }}">
+                <input type="hidden" name="csrf_token"
+                       value="{{ csrf_token() }}">
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <label class="form-label">Select Product</label>
+
+                        <select name="product_id"
+                                class="form-select" required>
+                            <option value="">Choose Product</option>
+
+                            {% for product in products %}
+                            <option value="{{ product.id }}"
+                                {% if forecast and forecast.product_id == product.id %}
+                                    selected
+                                {% endif %}>
+                                {{ product.name }} ({{ product.sku }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Forecast Days</label>
+
+                        <select name="days" class="form-select">
+                            <option value="7"
+                                {% if forecast and forecast.forecast_days == 7 %}selected{% endif %}>
+                                7 Days
+                            </option>
+
+                            <option value="14"
+                                {% if forecast and forecast.forecast_days == 14 %}selected{% endif %}>
+                                14 Days
+                            </option>
+
+                            <option value="30"
+                                {% if not forecast or forecast.forecast_days == 30 %}selected{% endif %}>
+                                30 Days
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit"
+                                class="btn btn-primary w-100">
+                            <i class="bi bi-graph-up me-1"></i>
+                            Generate Forecast
+                        </button>
+                    </div>
+
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if forecast %}
+
+    <!-- Forecast Summary -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Predicted Demand</p>
+                    <h3 class="fw-bold">
+                        {{ forecast.predicted_demand }}
+                    </h3>
+                    <small>Units</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Safety Stock</p>
+                    <h3 class="fw-bold">
+                        {{ forecast.safety_stock }}
+                    </h3>
+                    <small>Units</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Reorder Point</p>
+                    <h3 class="fw-bold">
+                        {{ forecast.reorder_point }}
+                    </h3>
+                    <small>Units</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Recommended Reorder</p>
+                    <h3 class="fw-bold">
+                        {{ forecast.reorder_quantity }}
+                    </h3>
+                    <small>Units</small>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Daily Demand Chart -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+
+            <h5 class="fw-bold mb-3">
+                <i class="bi bi-bar-chart-line me-2"></i>
+                Daily Demand Forecast
+            </h5>
+
+            <div style="height: 350px;">
+                <canvas id="demandForecastChart"></canvas>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Model Evaluation -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+
+            <h5 class="fw-bold mb-3">Model Evaluation</h5>
+
+            <div class="row">
+                <div class="col-md-4">
+                    <p class="text-muted mb-1">Model</p>
+                    <strong>Random Forest Regressor</strong>
+                </div>
+
+                <div class="col-md-4">
+                    <p class="text-muted mb-1">MAE</p>
+                    <strong>{{ forecast.mae }}</strong>
+                </div>
+
+                <div class="col-md-4">
+                    <p class="text-muted mb-1">RMSE</p>
+                    <strong>{{ forecast.rmse }}</strong>
+                </div>
+            </div>
+
+            <hr>
+
+            <p class="mb-1">
+                <strong>Forecast Period:</strong>
+                {{ forecast.forecast_days }} Days
+            </p>
+
+            <p class="mb-0">
+                <strong>Last Historical Date:</strong>
+                {{ forecast.last_historical_date }}
+            </p>
+
+        </div>
+    </div>
+
+    {% endif %}
+
+</div>
+{% endblock %}
+
+
+{% block scripts %}
+
+{% if forecast %}
+<script>
+    const dailyPredictions = {{ forecast.daily_predictions | tojson }};
+
+    const forecastLabels = dailyPredictions.map(
+        (_, index) => `Day ${index + 1}`
+    );
+
+    const chartCanvas = document.getElementById(
+        "demandForecastChart"
+    );
+
+    new Chart(chartCanvas, {
+        type: "line",
+
+        data: {
+            labels: forecastLabels,
+
+            datasets: [{
+                label: "Predicted Demand (Units)",
+                data: dailyPredictions,
+
+                borderWidth: 3,
+                tension: 0.3,
+                fill: true,
+
+                pointRadius: 3,
+                pointHoverRadius: 6
+            }]
+        },
+
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+
+            plugins: {
+                legend: {
+                    display: true
+                }
+            },
+
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: "Demand (Units)"
+                    }
+                },
+
+                x: {
+                    title: {
+                        display: true,
+                        text: "Forecast Days"
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endif %}
+
+{% endblock %}
